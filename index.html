@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>For My Love ❤️</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- LOCK SCREEN -->
+  <div id="lock-screen">
+    <h2>💌 Private Diary</h2>
+    <p>This space is only for you</p>
+
+    <input 
+      type="password" 
+      id="passwordInput" 
+      placeholder="Enter our secret word">
+
+    <br><br>
+
+    <button onclick="unlock()">Unlock ❤️</button>
+    <p id="error"></p>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="content" class="hidden">
+
+    <header>
+      <h1>Hi My Love 💕</h1>
+      <p>A little world I made just for you.</p>
+      <p id="love-note"></p>
+    </header>
+
+    <!-- NAVIGATION -->
+    <nav>
+      <button onclick="showSection('home')">Home</button>
+      <button onclick="showSection('diary')">Diary</button>
+      <button onclick="showSection('gallery')">Gallery</button>
+      <button onclick="showSection('vault')">Memory Vault</button>
+    </nav>
+
+    <!-- HOME SECTION -->
+    <section id="home">
+      <h2>💖 Our Memories</h2>
+      
+      <div id="slideshow" class="slideshow-container"></div>
+      <audio id="backgroundMusic" src="example.mp3" autoplay loop></audio>
+    </section>
+
+    <!-- DIARY SECTION -->
+    <section id="diary" class="hidden">
+      <h2>📓 Your Diary</h2>
+      <textarea 
+        id="diaryText" 
+        placeholder="Write anything you feel..."></textarea>
+      <br><br>
+      <button onclick="saveDiary()">Save Entry 💌</button>
+    </section>
+
+    <!-- GALLERY SECTION -->
+    <section id="gallery" class="hidden">
+      <h2>🖼️ Our Memories</h2>
+      <p>Click any photo or video to see it bigger 💕</p>
+
+      <!-- Photo Upload -->
+      <input type="file" id="photoInput" accept="image/*" multiple>
+      <button onclick="addPhotos()">Upload Photos 💕</button>
+
+      <div class="gallery" id="galleryDiv"></div>
+
+      <br>
+
+      <!-- Video Upload -->
+      <input type="file" id="videoInput" accept="video/*" multiple>
+      <button onclick="addVideos()">Upload Videos 🎬</button>
+
+      <div class="gallery" id="videoGallery"></div>
+    </section>
+
+    <!-- MEMORY VAULT SECTION -->
+    <section id="vault" class="hidden">
+      <h2>🔒 Memory Vault</h2>
+      <p>All your past diary entries, photos, and videos in one place 💕</p>
+
+      <div id="vaultDiary">
+        <h3>📓 Diary Entries</h3>
+      </div>
+
+      <div id="vaultPhotos">
+        <h3>🖼️ Uploaded Photos</h3>
+        <div class="gallery" id="vaultGallery"></div>
+      </div>
+
+      <div id="vaultVideos">
+        <h3>🎬 Uploaded Videos</h3>
+        <div class="gallery" id="vaultVideoGallery"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
