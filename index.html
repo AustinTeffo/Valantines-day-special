@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>For My Love ❤️</title>
+  <title>For Mihle ❤️</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -10,16 +10,11 @@
 
   <!-- LOCK SCREEN -->
   <div id="lock-screen">
-    <h2>💌 Private Diary</h2>
-    <p>This space is only for you</p>
+    <h2>💌 Welcome Mihle</h2>
+    <p>This space was made only for you</p>
 
-    <input 
-      type="password" 
-      id="passwordInput" 
-      placeholder="Enter our secret word">
-
+    <input type="password" id="passwordInput" placeholder="Enter our secret word">
     <br><br>
-
     <button onclick="unlock()">Unlock ❤️</button>
     <p id="error"></p>
   </div>
@@ -28,12 +23,11 @@
   <div id="content" class="hidden">
 
     <header>
-      <h1>Hi My Love 💕</h1>
+      <h1>Mihle’s Love Space 💕</h1>
       <p>A little world I made just for you.</p>
       <p id="love-note"></p>
     </header>
 
-    <!-- NAVIGATION -->
     <nav>
       <button onclick="showSection('home')">Home</button>
       <button onclick="showSection('diary')">Diary</button>
@@ -41,66 +35,88 @@
       <button onclick="showSection('vault')">Memory Vault</button>
     </nav>
 
-    <!-- HOME SECTION -->
     <section id="home">
       <h2>💖 Our Memories</h2>
-      
       <div id="slideshow" class="slideshow-container"></div>
       <audio id="backgroundMusic" src="example.mp3" autoplay loop></audio>
     </section>
 
-    <!-- DIARY SECTION -->
     <section id="diary" class="hidden">
-      <h2>📓 Your Diary</h2>
-      <textarea 
-        id="diaryText" 
-        placeholder="Write anything you feel..."></textarea>
+      <h2>📓 Mihle’s Diary</h2>
+      <textarea id="diaryText" placeholder="Write anything you feel..."></textarea>
       <br><br>
       <button onclick="saveDiary()">Save Entry 💌</button>
     </section>
 
-    <!-- GALLERY SECTION -->
     <section id="gallery" class="hidden">
       <h2>🖼️ Our Memories</h2>
-      <p>Click any photo or video to see it bigger 💕</p>
 
-      <!-- Photo Upload -->
       <input type="file" id="photoInput" accept="image/*" multiple>
       <button onclick="addPhotos()">Upload Photos 💕</button>
-
       <div class="gallery" id="galleryDiv"></div>
 
       <br>
 
-      <!-- Video Upload -->
       <input type="file" id="videoInput" accept="video/*" multiple>
       <button onclick="addVideos()">Upload Videos 🎬</button>
-
       <div class="gallery" id="videoGallery"></div>
     </section>
 
-    <!-- MEMORY VAULT SECTION -->
     <section id="vault" class="hidden">
-      <h2>🔒 Memory Vault</h2>
-      <p>All your past diary entries, photos, and videos in one place 💕</p>
+      <h2>🔒 Mihle’s Memory Vault</h2>
 
-      <div id="vaultDiary">
-        <h3>📓 Diary Entries</h3>
-      </div>
-
-      <div id="vaultPhotos">
-        <h3>🖼️ Uploaded Photos</h3>
-        <div class="gallery" id="vaultGallery"></div>
-      </div>
-
-      <div id="vaultVideos">
-        <h3>🎬 Uploaded Videos</h3>
-        <div class="gallery" id="vaultVideoGallery"></div>
-      </div>
+      <div id="vaultDiary"></div>
+      <div id="vaultGallery" class="gallery"></div>
+      <div id="vaultVideoGallery" class="gallery"></div>
     </section>
 
   </div>
 
-  <script src="script.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { 
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    doc,
+    updateDoc
+  } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+  import { 
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL,
+    listAll
+  } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBG6217q43g0DiUuNGi22aaSCtq8y0pnzs",
+    authDomain: "valantines-day-special.firebaseapp.com",
+    projectId: "valantines-day-special",
+    storageBucket: "valantines-day-special.firebasestorage.app",
+    messagingSenderId: "665490135507",
+    appId: "1:665490135507:web:d7a894491ac686e5ff3726"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  window.db = db;
+  window.storage = storage;
+  window.firebaseCollection = collection;
+  window.firebaseAddDoc = addDoc;
+  window.firebaseGetDocs = getDocs;
+  window.firebaseDoc = doc;
+  window.firebaseUpdateDoc = updateDoc;
+  window.firebaseRef = ref;
+  window.firebaseUploadBytes = uploadBytes;
+  window.firebaseGetDownloadURL = getDownloadURL;
+  window.firebaseListAll = listAll;
+</script>
+
+<script src="script.js"></script>
 </body>
 </html>

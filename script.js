@@ -1,258 +1,186 @@
-// ------------------ CONFIG ------------------
-const SECRET_PASSWORD = "love123"; // Change to your private word
+const SECRET_PASSWORD = "love123";
 
-// ------------------ LOCK SCREEN ------------------
+// ---------------- LOCK ----------------
 function unlock() {
   const input = document.getElementById("passwordInput").value;
-  if(input === SECRET_PASSWORD) {
+  if (input === SECRET_PASSWORD) {
     document.getElementById("lock-screen").style.display = "none";
     document.getElementById("content").classList.remove("hidden");
-    loadDiary();
+    loadDiaryEntries();
     loadPhotos();
     loadVideos();
-    showLoveNote();
     showSlideshow();
   } else {
     document.getElementById("error").innerText = "Wrong password 💔";
   }
 }
 
-// ------------------ NAVIGATION ------------------
 function showSection(id) {
-  document.querySelectorAll("section").forEach(sec => {
-    sec.classList.add("hidden");
-  });
+  document.querySelectorAll("section").forEach(sec => sec.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
-
-  if(id === "vault") {
-    showVault();
-  }
+  if (id === "vault") loadDiaryEntries();
 }
 
-// ------------------ DIARY ------------------
+// ---------------- DIARY ----------------
+async function saveDiary() {
+  const textArea = document.getElementById("diaryText");
+  const text = textArea.value.trim();
+  if (!text) return alert("Write something first 💌");
 
-// Load diary (clear textarea and remove edit mode)
-function loadDiary() {
-  document.getElementById("diaryText").value = "";
-  delete document.getElementById("diaryText").dataset.editId;
+  await window.firebaseAddDoc(
+    window.firebaseCollection(window.db, "diaryEntries"),
+    { text, date: new Date() }
+  );
+
+  textArea.value = "";
+  loadDiaryEntries();
 }
 
-// Save diary entry (new or edit)
-function saveDiary() {
-  const text = document.getElementById("diaryText").value.trim();
-  if (!text) {
-    alert("Write something before saving 💌");
-    return;
-  }
+async function loadDiaryEntries() {
+  const vault = document.getElementById("vaultDiary");
+  vault.innerHTML = "<h3>📓 Mihle’s Diary Entries</h3>";
 
-  let diaryEntries = JSON.parse(localStorage.getItem("diaryEntries") || "[]");
+  const snapshot = await window.firebaseGetDocs(
+    window.firebaseCollection(window.db, "diaryEntries")
+  );
 
-  // Check if editing existing entry
-  const editId = document.getElementById("diaryText").dataset.editId;
-  if(editId !== undefined) {
-    diaryEntries[editId].text = text;
-    diaryEntries[editId].date = new Date().toLocaleString();
-    delete document.getElementById("diaryText").dataset.editId;
-  } else {
-    diaryEntries.push({
-      text: text,
-      date: new Date().toLocaleString()
-    });
-  }
-
-  localStorage.setItem("diaryEntries", JSON.stringify(diaryEntries));
-  alert("Saved 💖");
-  document.getElementById("diaryText").value = "";
-  showVault();
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <p><strong>${new Date(data.date.seconds * 1000).toLocaleString()}</strong></p>
+      <p>${data.text}</p>
+      <hr>
+    `;
+    vault.appendChild(div);
+  });
 }
 
-// Edit a diary entry
-function editDiary(index) {
-  const diaryEntries = JSON.parse(localStorage.getItem("diaryEntries") || "[]");
-  const entry = diaryEntries[index];
-  document.getElementById("diaryText").value = entry.text;
-  document.getElementById("diaryText").dataset.editId = index;
-  showSection("diary");
-}
-
-// ------------------ LOVE NOTES ------------------
-function showLoveNote() {
-  const notes = [
-    "I love the way you smile ❤️",
-    "Every moment with you is magic ✨",
-    "You make my heart so full 💕",
-    "Thinking of you always 💌",
-    "You are my favorite everything 🌹"
-  ];
-  const randomNote = notes[Math.floor(Math.random() * notes.length)];
-  document.getElementById("love-note").innerText = randomNote;
-}
-
-// ------------------ PHOTO GALLERY ------------------
-function addPhotos() {
+// ---------------- PHOTOS ----------------
+async function addPhotos() {
   const input = document.getElementById("photoInput");
-  const galleryDiv = document.getElementById("galleryDiv");
-  if(!input.files.length) return;
+  if (!input.files.length) return;
 
-  let savedPhotos = JSON.parse(localStorage.getItem("photos") || "[]");
-
-  Array.from(input.files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const imgSrc = e.target.result;
-      savedPhotos.push(imgSrc);
-
-      const img = document.createElement("img");
-      img.src = imgSrc;
-      galleryDiv.appendChild(img);
-
-      localStorage.setItem("photos", JSON.stringify(savedPhotos));
-    }
-    reader.readAsDataURL(file);
-  });
-
-  input.value = "";
-}
-
-function loadPhotos() {
-  const galleryDiv = document.getElementById("galleryDiv");
-  const savedPhotos = JSON.parse(localStorage.getItem("photos") || "[]");
-  savedPhotos.forEach(src => {
-    const img = document.createElement("img");
-    img.src = src;
-    galleryDiv.appendChild(img);
-  });
-}
-
-// ------------------ VIDEO GALLERY ------------------
-function addVideos() {
-  const input = document.getElementById("videoInput");
-  const galleryDiv = document.getElementById("videoGallery");
-  if(!input.files.length) return;
-
-  let savedVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-
-  Array.from(input.files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const videoSrc = e.target.result;
-      savedVideos.push(videoSrc);
-
-      const video = document.createElement("video");
-      video.src = videoSrc;
-      video.controls = true;
-      video.width = 200;
-      video.style.borderRadius = "15px";
-      galleryDiv.appendChild(video);
-
-      localStorage.setItem("videos", JSON.stringify(savedVideos));
-    }
-    reader.readAsDataURL(file);
-  });
-
-  input.value = "";
-}
-
-function loadVideos() {
-  const galleryDiv = document.getElementById("videoGallery");
-  const savedVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-  savedVideos.forEach(src => {
-    const video = document.createElement("video");
-    video.src = src;
-    video.controls = true;
-    video.width = 200;
-    video.style.borderRadius = "15px";
-    galleryDiv.appendChild(video);
-  });
-}
-
-// ------------------ MEMORY VAULT ------------------
-function showVault() {
-  // Diary entries
-  const vaultDiary = document.getElementById("vaultDiary");
-  let diaryEntries = JSON.parse(localStorage.getItem("diaryEntries") || "[]");
-
-  if(diaryEntries.length > 0) {
-    vaultDiary.innerHTML = `<h3>📓 Diary Entries</h3>`;
-    diaryEntries.forEach((entry, index) => {
-      const entryDiv = document.createElement("div");
-      entryDiv.className = "vault-entry";
-      entryDiv.innerHTML = `
-        <p><strong>${entry.date}</strong></p>
-        <p>${entry.text.replace(/\n/g,'<br>')}</p>
-        <button onclick="editDiary(${index})">Edit ✏️</button>
-        <hr>
-      `;
-      vaultDiary.appendChild(entryDiv);
-    });
-  } else {
-    vaultDiary.innerHTML = `<h3>📓 Diary Entries</h3><p>No entries yet 💌</p>`;
+  for (let file of input.files) {
+    const storageRef = window.firebaseRef(window.storage, "photos/" + file.name);
+    await window.firebaseUploadBytes(storageRef, file);
   }
 
-  // Photos
-  const vaultGallery = document.getElementById("vaultGallery");
-  vaultGallery.innerHTML = "";
-  const savedPhotos = JSON.parse(localStorage.getItem("photos") || "[]");
-  savedPhotos.forEach(src => {
-    const img = document.createElement("img");
-    img.src = src;
-    vaultGallery.appendChild(img);
-  });
-
-  // Videos
-  const vaultVideoGallery = document.getElementById("vaultVideoGallery");
-  vaultVideoGallery.innerHTML = "";
-  const savedVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-  savedVideos.forEach(src => {
-    const video = document.createElement("video");
-    video.src = src;
-    video.controls = true;
-    video.width = 200;
-    video.style.borderRadius = "15px";
-    vaultVideoGallery.appendChild(video);
-  });
+  input.value = "";
+  loadPhotos();
 }
 
-// ------------------ HOME SLIDESHOW ------------------
+async function loadPhotos() {
+  const gallery = document.getElementById("galleryDiv");
+  const vaultGallery = document.getElementById("vaultGallery");
+  gallery.innerHTML = "";
+  vaultGallery.innerHTML = "";
+
+  const listRef = window.firebaseRef(window.storage, "photos/");
+  const result = await window.firebaseListAll(listRef);
+
+  for (let item of result.items) {
+    const url = await window.firebaseGetDownloadURL(item);
+
+    const img1 = document.createElement("img");
+    img1.src = url;
+    gallery.appendChild(img1);
+
+    const img2 = document.createElement("img");
+    img2.src = url;
+    vaultGallery.appendChild(img2);
+  }
+}
+
+// ---------------- VIDEOS ----------------
+async function addVideos() {
+  const input = document.getElementById("videoInput");
+  if (!input.files.length) return;
+
+  for (let file of input.files) {
+    const storageRef = window.firebaseRef(window.storage, "videos/" + file.name);
+    await window.firebaseUploadBytes(storageRef, file);
+  }
+
+  input.value = "";
+  loadVideos();
+}
+
+async function loadVideos() {
+  const gallery = document.getElementById("videoGallery");
+  const vaultGallery = document.getElementById("vaultVideoGallery");
+  gallery.innerHTML = "";
+  vaultGallery.innerHTML = "";
+
+  const listRef = window.firebaseRef(window.storage, "videos/");
+  const result = await window.firebaseListAll(listRef);
+
+  for (let item of result.items) {
+    const url = await window.firebaseGetDownloadURL(item);
+
+    const vid1 = document.createElement("video");
+    vid1.src = url;
+    vid1.controls = true;
+    vid1.width = 200;
+    gallery.appendChild(vid1);
+
+    const vid2 = document.createElement("video");
+    vid2.src = url;
+    vid2.controls = true;
+    vid2.width = 200;
+    vaultGallery.appendChild(vid2);
+  }
+}
+
+// ---------------- SLIDESHOW ----------------
 let slideIndex = 0;
 
-function showSlideshow() {
-  const slideshowDiv = document.getElementById("slideshow");
-  slideshowDiv.innerHTML = "";
+async function showSlideshow() {
+  const slideshow = document.getElementById("slideshow");
+  slideshow.innerHTML = "";
 
-  const photos = JSON.parse(localStorage.getItem("photos") || "[]");
-  const videos = JSON.parse(localStorage.getItem("videos") || "[]");
-  const slides = [...photos, ...videos];
+  const photoRef = window.firebaseRef(window.storage, "photos/");
+  const videoRef = window.firebaseRef(window.storage, "videos/");
 
-  slides.forEach(src => {
+  const photoList = await window.firebaseListAll(photoRef);
+  const videoList = await window.firebaseListAll(videoRef);
+
+  const urls = [];
+
+  for (let item of photoList.items) {
+    urls.push(await window.firebaseGetDownloadURL(item));
+  }
+  for (let item of videoList.items) {
+    urls.push(await window.firebaseGetDownloadURL(item));
+  }
+
+  urls.forEach(url => {
     let element;
-    if(src.endsWith(".mp4") || src.startsWith("data:video")) {
+    if (url.includes(".mp4")) {
       element = document.createElement("video");
-      element.src = src;
-      element.controls = false;
+      element.src = url;
       element.muted = true;
       element.loop = true;
     } else {
       element = document.createElement("img");
-      element.src = src;
+      element.src = url;
     }
-    slideshowDiv.appendChild(element);
+    slideshow.appendChild(element);
   });
 
-  if(slides.length > 0) startSlideshow();
+  if (urls.length) startSlideshow();
 }
 
 function startSlideshow() {
   const slides = document.querySelectorAll("#slideshow img, #slideshow video");
-  slides.forEach(slide => slide.style.display = "none");
+  slides.forEach(s => s.style.display = "none");
 
   slideIndex++;
-  if(slideIndex > slides.length) slideIndex = 1;
+  if (slideIndex > slides.length) slideIndex = 1;
 
-  const currentSlide = slides[slideIndex - 1];
-  currentSlide.style.display = "block";
-
-  if(currentSlide.tagName === "VIDEO") currentSlide.play();
+  const current = slides[slideIndex - 1];
+  current.style.display = "block";
+  if (current.tagName === "VIDEO") current.play();
 
   setTimeout(startSlideshow, 5000);
 }
